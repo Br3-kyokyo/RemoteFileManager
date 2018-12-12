@@ -101,7 +101,7 @@ void* editfile(int args){
     //TCPバッファから命令コマンド文字列を読み取り
     sock_n=read(sockfd, buff, 255);
     //命令コマンド文字列をパース
-    char* command[ARGSIZE];
+    char* command[255];
     int i=0;
     command[i] = strtok(buff, " ");
     while ( (i < ARGSIZE-1) && (command[i] != NULL)){
