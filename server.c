@@ -105,7 +105,7 @@ void* editfile(int args){
   //常にTCPコネクションを監視する
   while (1) {
     //TCPバッファから命令コマンド文字列を読み取り
-    sock_n=read(sockfd, buff, 255);
+    sock_n = read(sockfd, buff, 255);
     //命令コマンド文字列をパース
     char* command[2];
     int i=0;
@@ -114,7 +114,7 @@ void* editfile(int args){
       command[++i] = strtok(NULL, " ");
     }
 
-    //printf("cmd parse fin!\n");
+    printf("cmd parse fin!\n");
     //コマンド別に関数を実行
     //endコマンドを受信するまで実行し続ける
     printf("%d", sock_n);
