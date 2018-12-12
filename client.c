@@ -48,6 +48,7 @@ int main(int argc, char* argv[]){
 
     printf("input command!\n");
     printf(">>");
+    fflush(stdin);
     n = read(0, buff, 255);
     while(strcmp(buff, endcmd) != 0){
 
@@ -62,7 +63,8 @@ int main(int argc, char* argv[]){
 
         memset(buff, '\n', 255);
         printf("input command!\n");
-        printf(">>");
+        printf(">>");        
+        fflush(stdin);
         n = read(0, buff, 255);
     }
 
