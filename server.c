@@ -170,6 +170,7 @@ int main(){
           printf("thread(%d): Connected!\n",i);
           int arg;
           arg = sockfd[i];
+	  printf("test\n");
         	if(pthread_create(&thread[i], NULL, editfile, (void *) &arg)){
         		perror("Thread creation failed");
         		return EXIT_FAILURE;
