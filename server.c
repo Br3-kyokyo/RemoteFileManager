@@ -114,13 +114,13 @@ void* editfile(int args){
       command[++i] = strtok(NULL, " ");
     }
 
-    printf("cmd parse fin!\n");
+    //printf("cmd parse fin!\n");
     //コマンド別に関数を実行
     //endコマンドを受信するまで実行し続ける
-    printf("sock_n: %d\n", sock_n);
+    //printf("sock_n: %d\n", sock_n);
 
     if(sock_n == -1){
-      printf("socket err!\n");
+      //printf("socket err!\n");
       continue;
     }else if(strcmp(command[0], readcmd) == 0){
       printf("req:read\n");
