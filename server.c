@@ -93,6 +93,9 @@ void* editfile(int args){
   int sockfd = args;
   size_t sock_n;
 
+
+    printf("edit file!\n");
+
   //常にTCPコネクションを監視する
   while (1) {
     //TCPバッファから命令コマンド文字列を読み取り
@@ -105,6 +108,7 @@ void* editfile(int args){
       command[++i] = strtok(NULL, " ");
     }
 
+    printf("cmd parse fin!\n");
     //コマンド別に関数を実行
     //endコマンドを受信するまで実行し続ける
     char readcmd[] = "read";
