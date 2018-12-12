@@ -168,9 +168,9 @@ int main(){
       }
       if(errno != EINVAL){
           printf("thread(%d): Connected!\n",i);
-          int args[1];
-          args[0] = sockfd[i];
-        	if(pthread_create(&thread[i], NULL, editfile, (void *) args)){
+          int arg;
+          arg = sockfd[i];
+        	if(pthread_create(&thread[i], NULL, editfile, (void *) &arg)){
         		perror("Thread creation failed");
         		return EXIT_FAILURE;
         	}
