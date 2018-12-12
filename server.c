@@ -143,7 +143,7 @@ int main(){
   struct sockaddr_in foreinAddr[CONNECTION_NUM] = {};
   pthread_t thread[CONNECTION_NUM];
   int clitLen[CONNECTION_NUM]; // client internet socket address length
-  socklen_t socklen = 5;
+  int socklen =5;
 
   printf("Preparing sockets...\n");
   //コネクション数だけソケットを確保
@@ -174,6 +174,8 @@ int main(){
         		perror("Thread creation failed");
         		return EXIT_FAILURE;
         	}
+
+          pthread_join(thread[i], NULL);
       }
     }
   }
