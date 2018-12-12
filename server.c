@@ -129,6 +129,7 @@ void* editfile(int args){
       write(sockfd, errmsg, sizeof(errmsg)); //クライアントにエラーメッセージを送信
     }
     //メモリクリア
+    printf("memclear\n");
     memset(buff, '\n', 255);
     for(i=0; i<ARGSIZE; i++){
       memset(command[i], '\n', 255);
