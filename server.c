@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#define CONNECTION_NUM 5
+#define CONNECTION_NUM 1
 #define ARGSIZE 2
 
 int errno;
