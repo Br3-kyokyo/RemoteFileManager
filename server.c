@@ -123,9 +123,12 @@ void* editfile(int args){
       printf("req:write %s\n",command[1]);
       writefile(sockfd, command[1]);
     }else if(strcmp(command[0], endcmd) == 0){
+      printf("end!\n");
       break;
     }else if(command[0] == NULL){
+      printf("null!\n");
     }else{
+      printf("err!\n");
       write(sockfd, errmsg, sizeof(errmsg)); //クライアントにエラーメッセージを送信
     }
     //メモリクリア
