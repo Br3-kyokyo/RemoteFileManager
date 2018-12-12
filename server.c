@@ -93,8 +93,14 @@ void* editfile(int args){
   int sockfd = args;
   size_t sock_n;
 
+  char readcmd[] = "read";
+  char writecmd[] = "wtite";
+  char endcmd[] = "end";
+  char errmsg[] = "invalid command.";
 
-    printf("edit file!\n");
+
+
+  printf("edit file!\n");
 
   //常にTCPコネクションを監視する
   while (1) {
@@ -111,16 +117,11 @@ void* editfile(int args){
     printf("cmd parse fin!\n");
     //コマンド別に関数を実行
     //endコマンドを受信するまで実行し続ける
-    char readcmd[] = "read";
-    char writecmd[] = "wtite";
-    char endcmd[] = "end";
-    char errmsg[] = "invalid command.";
-
-
     printf("sock_n: %d\n", sock_n);
 
-    if(command[0] == NULL){
-      printf("null!\n");
+    if(sock_n == -1){
+      printf("socket err!\n");
+      continue;
     }else if(strcmp(command[0], readcmd) == 0){
       printf("req:read\n");
       readfile(sockfd, command[1]);
@@ -137,9 +138,6 @@ void* editfile(int args){
     //メモリクリア
     printf("memclear\n");
     memset(buff, '\0', 255);
-    for(i=0; i<ARGSIZE; i++){
-      memset(command[i], '\0', 255);
-    }
   }
   //一連の処理が終わったらコネクション切断
   close(sockfd);
