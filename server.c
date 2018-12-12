@@ -116,6 +116,9 @@ void* editfile(int args){
     char endcmd[] = "end";
     char errmsg[] = "invalid command.";
 
+
+    printf("sock_n: %d\n", sock_n);
+
     if(command[0] == NULL){
       printf("null!\n");
     }else if(strcmp(command[0], readcmd) == 0){
