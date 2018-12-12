@@ -50,15 +50,16 @@ int main(int argc, char* argv[]){
     printf(">>");
     fflush(stdout);
     n = read(0, buff, 255);
+
     while(strcmp(buff, endcmd) != 0){
-
-
         //同期-step1
-        write(sockfd, buff, n);
+        printf("before write\n");
+        sendto(sockfd, buff, n, 0, (struct sockaddr *)addr, sizeof(addr));
+        printf("after write\n");
 
         sleep(1);
 
-        n = read(sockfd, buff, 255);
+        n = recv(sockfd, buff, 255, 0);
         printf("%s\n", buff);
 
         memset(buff, '\n', 255);
@@ -69,7 +70,7 @@ int main(int argc, char* argv[]){
     }
 
     //endが入力されたらend命令を送信
-    write(sockfd, endcmd, sizeof(endcmd));
+    sendto(sockfd, endcmd, sizeof(endcmd), 0, (struct sockaddr *)addr, sizeof(addr));
 
     return 0;
 }
