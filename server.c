@@ -121,6 +121,7 @@ void* editfile(int args){
 
     if(sock_n == -1){
       //printf("socket err!\n");
+      sleep(1);
       continue;
     }else if(strcmp(command[0], readcmd) == 0){
       printf("req:read\n");
