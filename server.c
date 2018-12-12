@@ -24,6 +24,8 @@ int readfile(int sockfd, void* command){
     int fd_r;
     char buff[4096];
 
+    printf("readfile open\n");
+
     size_t n;
     if ((fd_r = open("file",O_RDONLY)) < 0){
         perror("file");
@@ -35,11 +37,16 @@ int readfile(int sockfd, void* command){
     write(sockfd, resHead, sizeof(resHead));
     write(sockfd, buff, n);
 
+
+    printf("readfile close\n");
     close(fd_r);
     return 0;
 }
 
 int writefile(int sockfd, void* command) {
+
+
+    printf("writefile open\n");
 
     //書き込み処理
     int fd_w;
@@ -50,6 +57,9 @@ int writefile(int sockfd, void* command) {
     write(fd_w, (char *) command, sizeof(command[1]));
     close(fd_w);
 
+    printf("writefile close\n");
+
+    printf("readfile open\n");
     //書き込み結果を表示
     int fd_r;
     char buff[4096];
@@ -66,6 +76,11 @@ int writefile(int sockfd, void* command) {
     //レスポンスを返す
     write(sockfd, resHead, sizeof(resHead));
     write(sockfd, buff, n);
+
+
+    printf("readfile close\n");
+
+    close(fd_r);
 
     return 0;
 }
@@ -98,8 +113,10 @@ void* editfile(void* args){
     char errmsg[] = "invalid command.";
 
     if(strcmp(command[0], readcmd) == 0){
+      printf("req:read\n");
       readfile(sockfd, command[1]);
     }else if(strcmp(command[0], writecmd) == 0){
+      printf("req:write %s\n",command[1]);
       writefile(sockfd, command[1]);
     }else if(strcmp(command[0], endcmd) == 0){
       break;
