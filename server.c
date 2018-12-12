@@ -87,10 +87,10 @@ int writefile(int sockfd, void* command) {
 
 //スレッド関数
 //sockfdを受けとる
-void* editfile(void* args){
+void* editfile(int args){
 
   char buff[255];
-  int sockfd = ((int *)args)[0];
+  int sockfd = args;
   size_t sock_n;
 
   //常にTCPコネクションを監視する
@@ -171,13 +171,15 @@ int main(){
           printf("thread(%d): Connected!\n",i);
           int arg;
           arg = sockfd[i];
-          printf("test\n");  
-        	if(pthread_create(&thread[i], NULL, editfile, (void *) &arg)){
-        		perror("Thread creation failed");
-        		return EXIT_FAILURE;
-        	}
+          printf("test\n");
+          //if(pthread_create(&thread[i], NULL, editfile, (void *) &arg)){
+        	//	perror("Thread creation failed");
+        	///	return EXIT_FAILURE;
+        	//}
+          //pthread_join(thread[i], NULL);
 
-          pthread_join(thread[i], NULL);
+          editfile(arg);
+
       }
     }
 
