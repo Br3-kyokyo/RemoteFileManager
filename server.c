@@ -1,0 +1,161 @@
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/un.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <errno.h>
+#include <unistd.h>
+
+#define CONNECTION_NUM 5
+#define ARGSIZE 2
+
+int errno;
+char resHead[] = "response:\n";
+
+
+int readfile(int sockfd, void* command){
+    int fd_r;
+    char buff[4096];
+
+    size_t n;
+    if ((fd_r = open("file",O_RDONLY)) < 0){
+        perror("file");
+        return 1;
+    }
+    //ファイル内容をread
+    n = read(fd_r, buff, 4096);
+    //ソケットに書き込み
+    write(sockfd, resHead, sizeof(resHead));
+    write(sockfd, buff, n);
+
+    close(fd_r);
+    return 0;
+}
+
+int writefile(int sockfd, void* command) {
+
+    //書き込み処理
+    int fd_w;
+    if ((fd_w = open("file", O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0){
+        perror("file");
+        return 1;
+    }
+    write(fd_w, (char *) command, sizeof(command[1]));
+    close(fd_w);
+
+    //書き込み結果を表示
+    int fd_r;
+    char buff[4096];
+
+    size_t n;
+    if ((fd_r = open("file",O_RDONLY)) < 0){
+        perror("file");
+        return 1;
+    }
+    //ファイル内容をread
+    n = read(fd_r, buff, 4096);
+
+
+    //レスポンスを返す
+    write(sockfd, resHead, sizeof(resHead));
+    write(sockfd, buff, n);
+
+    return 0;
+}
+
+//スレッド関数
+//sockfdを受けとる
+void* editfile(void* args){
+
+  char buff[255];
+  int sockfd = ((int *)args)[0];
+  size_t sock_n;
+
+  //常にTCPコネクションを監視する
+  while (1) {
+    //TCPバッファから命令コマンド文字列を読み取り
+    sock_n=read(sockfd, buff, 255);
+    //命令コマンド文字列をパース
+    char* command[ARGSIZE];
+    int i=0;
+    command[i] = strtok(buff, " ");
+    while ( (i < ARGSIZE-1) && (command[i] != NULL)){
+      command[++i] = strtok(NULL, " ");
+    }
+
+    //コマンド別に関数を実行
+    //endコマンドを受信するまで実行し続ける
+    char readcmd[] = "read";
+    char writecmd[] = "wtite";
+    char endcmd[] = "end";
+    char errmsg[] = "invalid command.";
+
+    if(strcmp(command[0], readcmd) == 0){
+      readfile(sockfd, command[1]);
+    }else if(strcmp(command[0], writecmd) == 0){
+      writefile(sockfd, command[1]);
+    }else if(strcmp(command[0], endcmd) == 0){
+      break;
+    }else if(command[0] == NULL){
+    }else{
+      write(sockfd, errmsg, sizeof(errmsg)); //クライアントにエラーメッセージを送信
+    }
+    //メモリクリア
+    memset(buff, '\n', 255);
+    for(i=0; i<ARGSIZE; i++){
+      memset(command[i], '\n', 255);
+    }
+  }
+  //一連の処理が終わったらコネクション切断
+  close(sockfd);
+  return NULL;
+}
+
+int main(){
+
+  int i;
+  int sockfd[CONNECTION_NUM];
+  struct sockaddr_in localAddr[CONNECTION_NUM] = {};
+  struct sockaddr_in foreinAddr[CONNECTION_NUM] = {};
+  pthread_t thread[CONNECTION_NUM];
+  int clitLen; // client internet socket address length
+  socklen_t socklen = 5;
+
+  printf("Preparing sockets...\n");
+  //コネクション数だけソケットを確保
+  for(i=0; i<CONNECTION_NUM; i++){
+    sockfd[i] = socket(AF_INET, SOCK_STREAM, 0);
+    localAddr[i].sin_family = AF_INET;
+    localAddr[i].sin_port = htons(5000+i);
+    localAddr[i].sin_addr.s_addr = htonl(INADDR_ANY); //IPadress of display
+    bind(sockfd[i], (struct sockaddr *) &localAddr[i], sizeof(localAddr[i]));
+  }
+
+  printf("Preparation finish!\n");
+
+  //接続ができたら、スレッドを分岐する
+  //常に接続を待機しておく
+  while (1) {
+    for(i=0; i<CONNECTION_NUM; i++){
+      listen(sockfd[i], socklen);
+      printf("thread(%d): Searching client...\n",i);
+      accept(sockfd[i], (struct sockaddr *) &foreinAddr[i], &clitLen);
+      if(errno != EINVAL){
+          printf("thread(%d): Connected!\n",i);
+          int args[1];
+          args[0] = sockfd[i];
+        	if(pthread_create(&thread[i], NULL, editfile, (void *) args)){
+        		perror("Thread creation failed");
+        		return EXIT_FAILURE;
+        	}
+      }
+    }
+  }
+}
