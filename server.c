@@ -101,7 +101,7 @@ void* editfile(int args){
     //TCPバッファから命令コマンド文字列を読み取り
     sock_n=read(sockfd, buff, 255);
     //命令コマンド文字列をパース
-    char* command[255];
+    char* command[2];
     int i=0;
     command[i] = strtok(buff, " ");
     while ( (i < ARGSIZE-1) && (command[i] != NULL)){
@@ -116,7 +116,9 @@ void* editfile(int args){
     char endcmd[] = "end";
     char errmsg[] = "invalid command.";
 
-    if(strcmp(command[0], readcmd) == 0){
+    if(command[0] == NULL){
+      printf("null!\n");
+    }else if(strcmp(command[0], readcmd) == 0){
       printf("req:read\n");
       readfile(sockfd, command[1]);
     }else if(strcmp(command[0], writecmd) == 0){
@@ -125,17 +127,15 @@ void* editfile(int args){
     }else if(strcmp(command[0], endcmd) == 0){
       printf("end!\n");
       break;
-    }else if(command[0] == NULL){
-      printf("null!\n");
     }else{
       printf("err!\n");
       write(sockfd, errmsg, sizeof(errmsg)); //クライアントにエラーメッセージを送信
     }
     //メモリクリア
     printf("memclear\n");
-    memset(buff, '\n', 255);
+    memset(buff, '\0', 255);
     for(i=0; i<ARGSIZE; i++){
-      memset(command[i], '\n', 255);
+      memset(command[i], '\0', 255);
     }
   }
   //一連の処理が終わったらコネクション切断
