@@ -34,8 +34,8 @@ int readfile(int sockfd, void* command){
     //ファイル内容をread
     n = read(fd_r, buff, 4096);
     //ソケットに書き込み
-    write(sockfd, resHead, sizeof(resHead));
-    write(sockfd, buff, n);
+    send(sockfd, resHead, sizeof(resHead), 0);
+    send(sockfd, buff, n, 0);
 
 
     printf("readfile close\n");
@@ -54,7 +54,7 @@ int writefile(int sockfd, void* command) {
         perror("file");
         return 1;
     }
-    write(fd_w, (char *) command, sizeof(command[1]));
+    send(fd_w, (char *) command, sizeof(command[1]), 0);
     close(fd_w);
 
     printf("writefile close\n");
@@ -74,8 +74,8 @@ int writefile(int sockfd, void* command) {
 
 
     //レスポンスを返す
-    write(sockfd, resHead, sizeof(resHead));
-    write(sockfd, buff, n);
+    send(sockfd, resHead, sizeof(resHead), 0);
+    send(sockfd, buff, n, 0);
 
 
     printf("readfile close\n");
@@ -105,7 +105,7 @@ void* editfile(int args){
   //常にTCPコネクションを監視する
   while (1) {
     //TCPバッファから命令コマンド文字列を読み取り
-    sock_n=read(sockfd, buff, 255);
+    sock_n=recv(sockfd, buff, 255, 0);
     //命令コマンド文字列をパース
     char* command[2];
     int i=0;
@@ -134,7 +134,7 @@ void* editfile(int args){
       break;
     }else{
       printf("err!\n");
-      write(sockfd, errmsg, sizeof(errmsg)); //クライアントにエラーメッセージを送信
+      send(sockfd, errmsg, sizeof(errmsg),  0); //クライアントにエラーメッセージを送信
     }
     //メモリクリア
     printf("memclear\n");
