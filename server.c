@@ -114,7 +114,7 @@ void* editfile(int args){
       command[++i] = strtok(NULL, " ");
     }
 
-    //printf("cmd parse fin!\n");
+    printf("cmd parse fin!\n");
     //コマンド別に関数を実行
     //endコマンドを受信するまで実行し続ける
     printf("%d", sock_n);
