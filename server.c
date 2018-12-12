@@ -160,6 +160,7 @@ int main(){
   //接続ができたら、スレッドを分岐する
   //常に接続を待機しておく
   while (1) {
+
     for(i=0; i<CONNECTION_NUM; i++){
       listen(sockfd[i], socklen);
       printf("thread(%d): Searching client...\n",i);
@@ -170,7 +171,7 @@ int main(){
           printf("thread(%d): Connected!\n",i);
           int arg;
           arg = sockfd[i];
-        	if(pthread_create(&thread[i], NULL, editfile, (void *) &arg)){
+          if(pthread_create(&thread[i], NULL, editfile, (void *) &arg)){
         		perror("Thread creation failed");
         		return EXIT_FAILURE;
         	}
@@ -178,5 +179,6 @@ int main(){
           pthread_join(thread[i], NULL);
       }
     }
+
   }
 }
