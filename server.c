@@ -18,6 +18,12 @@
 
 int errno;
 char resHead[] = "response:\n";
+int sockfd[CONNECTION_NUM];
+struct sockaddr_in localAddr[CONNECTION_NUM] = {};
+struct sockaddr_in foreinAddr[CONNECTION_NUM] = {};
+pthread_t thread[CONNECTION_NUM];
+int clitLen[CONNECTION_NUM]; // client internet socket address length
+int socklen =5;
 
 
 int readfile(int sockfd, void* command){
@@ -105,7 +111,7 @@ void* editfile(int args){
   //常にTCPコネクションを監視する
   while (1) {
     //TCPバッファから命令コマンド文字列を読み取り
-    sock_n=recv(sockfd, buff, 255, 0);
+    sock_n=recvfrom(sockfd, buff, 255, 0, (struct sockaddr *)foreinAddr[i], sizeof(foreinAddr[i]));
     //命令コマンド文字列をパース
     char* command[2];
     int i=0;
@@ -148,12 +154,6 @@ void* editfile(int args){
 int main(){
 
   int i;
-  int sockfd[CONNECTION_NUM];
-  struct sockaddr_in localAddr[CONNECTION_NUM] = {};
-  struct sockaddr_in foreinAddr[CONNECTION_NUM] = {};
-  pthread_t thread[CONNECTION_NUM];
-  int clitLen[CONNECTION_NUM]; // client internet socket address length
-  int socklen =5;
 
   printf("Preparing sockets...\n");
   //コネクション数だけソケットを確保
