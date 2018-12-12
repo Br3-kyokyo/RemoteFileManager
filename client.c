@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
     int sockfd;
     struct sockaddr_in addr;
 
-    if((sockfd = socket(AF_INET, SOCK_STREAM, 0))<0){
+    if((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))<0){
         perror("client socket\n");
         return 1;
     }

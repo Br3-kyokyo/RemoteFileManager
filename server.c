@@ -125,7 +125,7 @@ int main(){
   struct sockaddr_in localAddr[CONNECTION_NUM] = {};
   struct sockaddr_in foreinAddr[CONNECTION_NUM] = {};
   pthread_t thread[CONNECTION_NUM];
-  int clitLen; // client internet socket address length
+  int clitLen[CONNECTION_NUM]; // client internet socket address length
   socklen_t socklen = 5;
 
   printf("Preparing sockets...\n");
@@ -146,7 +146,9 @@ int main(){
     for(i=0; i<CONNECTION_NUM; i++){
       listen(sockfd[i], socklen);
       printf("thread(%d): Searching client...\n",i);
-      accept(sockfd[i], (struct sockaddr *) &foreinAddr[i], &clitLen);
+      if(accept(sockfd[i], (struct sockaddr *) &foreinAddr[i], &clitLen[i]) < 0){
+          perror("accept");
+      }
       if(errno != EINVAL){
           printf("thread(%d): Connected!\n",i);
           int args[1];
