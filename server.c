@@ -133,7 +133,7 @@ int main(){
   for(i=0; i<CONNECTION_NUM; i++){
     sockfd[i] = socket(AF_INET, SOCK_STREAM, 0);
     localAddr[i].sin_family = AF_INET;
-    localAddr[i].sin_port = htons(5000+i);
+    localAddr[i].sin_port = htons(50000+i);
     localAddr[i].sin_addr.s_addr = htonl(INADDR_ANY); //IPadress of display
     bind(sockfd[i], (struct sockaddr *) &localAddr[i], sizeof(localAddr[i]));
   }
