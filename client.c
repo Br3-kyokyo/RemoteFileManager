@@ -13,8 +13,8 @@
 #include <errno.h>
 #include <unistd.h>
 
-//#define FOREIN_IP "18.217.143.238"
-#define FOREIN_IP "127.0.0.1"
+#define FOREIN_IP "18.217.143.238"
+//#define FOREIN_IP "127.0.0.1"
 
 int errno;
 
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]){
         sleep(1);
 
         n = recv(sockfd, buff, 255, 0);
-        printf("=====response=====");
+        printf("=====response=====\n");
         printf("%s\n", buff);
 
         memset(buff, '\n', 255);
