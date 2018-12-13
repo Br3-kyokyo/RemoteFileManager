@@ -16,14 +16,16 @@
 #define CONNECTION_NUM 1
 #define ARGSIZE 2
 
+
 int errno;
 char resHead[] = "response:\n";
-int sockfd[CONNECTION_NUM];
-struct sockaddr_in localAddr[CONNECTION_NUM] = {};
-struct sockaddr_in foreinAddr[CONNECTION_NUM] = {};
-pthread_t thread[CONNECTION_NUM];
-int clitLen[CONNECTION_NUM]; // client internet socket address length
+int sockfd;
+struct sockaddr_in localAddr;
+struct sockaddr_in foreinAddr;
+pthread_t thread;
+socklen_t foreinlen; // client internet socket address length
 int socklen =5;
+
 
 
 int readfile(int sockfd, void* command){
@@ -93,10 +95,9 @@ int writefile(int sockfd, void* command) {
 
 //スレッド関数
 //sockfdを受けとる
-void* editfile(int args){
+void* editfile(int sockfd){
 
   char buff[255];
-  int sockfd = args;
   size_t sock_n;
 
   char readcmd[] = "read";
@@ -104,17 +105,17 @@ void* editfile(int args){
   char endcmd[] = "end";
   char errmsg[] = "invalid command.";
 
-
-
   printf("edit file!\n");
 
   //常にTCPコネクションを監視する
   while (1) {
-    //TCPバッファから命令コマンド文字列を読み取り
-    sock_n=recvfrom(sockfd, buff, 255, 0, (struct sockaddr *)foreinAddr[i], sizeof(foreinAddr[i]));
-    //命令コマンド文字列をパース
+
     char* command[2];
     int i=0;
+
+    //TCPバッファから命令コマンド文字列を読み取り
+    sock_n = recvfrom(sockfd, buff, 255, 0, (struct sockaddr *)&foreinAddr, sizeof(struct sockaddr_in));
+    //命令コマンド文字列をパース
     command[i] = strtok(buff, " ");
     while ( (i < ARGSIZE-1) && (command[i] != NULL)){
       command[++i] = strtok(NULL, " ");
@@ -123,7 +124,7 @@ void* editfile(int args){
     printf("cmd parse fin!\n");
     //コマンド別に関数を実行
     //endコマンドを受信するまで実行し続ける
-    printf("%d", sock_n);
+    printf("%ld: %d", sock_n, errno);
 
     if(sock_n == -1){
       //printf("socket err!\n");
@@ -151,12 +152,25 @@ void* editfile(int args){
   return NULL;
 }
 
+
+/*
+int errno;
+char resHead[] = "response:\n";
+int sockfd[CONNECTION_NUM];
+struct sockaddr_in localAddr[CONNECTION_NUM] = {};
+struct sockaddr_in foreinAddr[CONNECTION_NUM] = {};
+pthread_t thread[CONNECTION_NUM];
+int clitLen[CONNECTION_NUM]; // client internet socket address length
+int socklen =5;
+
+
 int main(){
 
   int i;
 
   printf("Preparing sockets...\n");
   //コネクション数だけソケットを確保
+  
   for(i=0; i<CONNECTION_NUM; i++){
     sockfd[i] = socket(AF_INET, SOCK_STREAM, 0);
     localAddr[i].sin_family = AF_INET;
@@ -193,5 +207,39 @@ int main(){
       }
     }
 
+  }
+}
+*/
+
+
+int main(){
+
+  int i;
+
+  printf("Preparing sockets...\n");
+  //コネクション数だけソケットを確保
+  
+  sockfd= socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  memset(&localAddr, 0, sizeof(localAddr));
+  localAddr.sin_family = AF_INET;
+  localAddr.sin_port = htons(50000);
+  localAddr.sin_addr.s_addr = INADDR_ANY; //IPadress of display
+  bind(sockfd, (struct sockaddr *) &localAddr, sizeof(localAddr));
+
+  printf("Preparation finish!\n");
+
+  //接続ができたら、スレッドを分岐する
+  //常に接続を待機しておく
+  while (1) {
+
+    listen(sockfd, socklen);
+    printf("Searching client...\n");
+    if(accept(sockfd, (struct sockaddr *) &foreinAddr, &foreinlen) < 0){
+        perror("accept");
+    }
+    if(errno != EINVAL){
+        printf("Connected!\n");
+        editfile(sockfd);
+    }
   }
 }

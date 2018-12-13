@@ -13,7 +13,8 @@
 #include <errno.h>
 #include <unistd.h>
 
-#define FOREIN_IP "18.217.143.238"
+//#define FOREIN_IP "18.217.143.238"
+#define hostname "localhost"
 
 int errno;
 
@@ -23,16 +24,20 @@ int main(int argc, char* argv[]){
 
     int sockfd;
     struct sockaddr_in addr;
+    struct hostent* hp;
 
     if((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))<0){
         perror("client socket\n");
         return 1;
     }
 
+    if((hp = gethostbyname(hostname)) == NULL)
+
+    memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(50000);
     addr.sin_addr.s_addr = inet_addr(FOREIN_IP); //IPadress of display
-    if(connect(sockfd, (struct sockaddr *)&addr, sizeof(addr))<0){
+    if(connect(sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in))<0){
         perror("connect");
         return 1;
     }
@@ -54,7 +59,7 @@ int main(int argc, char* argv[]){
     while(strcmp(buff, endcmd) != 0){
         //同期-step1
         printf("before write\n");
-        sendto(sockfd, buff, n, 0, (struct sockaddr *)addr, sizeof(addr));
+        sendto(sockfd, buff, n, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
         printf("after write\n");
 
         sleep(1);
@@ -70,7 +75,7 @@ int main(int argc, char* argv[]){
     }
 
     //endが入力されたらend命令を送信
-    sendto(sockfd, endcmd, sizeof(endcmd), 0, (struct sockaddr *)addr, sizeof(addr));
+    send(sockfd, endcmd, sizeof(endcmd), 0);
 
     return 0;
 }
