@@ -13,8 +13,8 @@
 #include <errno.h>
 #include <unistd.h>
 
-#define FOREIN_IP "18.217.143.238"
-//#define FOREIN_IP "127.0.0.1"
+//#define FOREIN_IP "18.217.143.238"
+#define FOREIN_IP "127.0.0.1"
 
 int errno;
 
@@ -58,13 +58,12 @@ int main(int argc, char* argv[]){
 
     while(strcmp(buff, endcmd) != 0){
         //同期-step1
-        sendto(sockfd, buff, n, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-        printf("send complete!\n");
+        send(sockfd, buff, n, 0);
 
-        sleep(1);
+        usleep(1000);
 
         n = recv(sockfd, buff, 255, 0);
-        printf("=====response=====\n");
+        printf("\n=====response=====\n");
         printf("%s\n", buff);
 
         memset(buff, '\n', 255);
