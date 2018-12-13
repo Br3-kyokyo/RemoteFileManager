@@ -42,11 +42,12 @@ int readfile(int sockfd, char* command){
     n = read(fd_r, buff, 4096);
     printf("file:%s\n", buff);
     //ソケットに書き込み
-    if(sendto(sockfd, resHead, sizeof(resHead), 0, (struct sockaddr *) &foreinAddr, sizeof(struct sockaddr_in)) < 0){
+
+    if(send(sockfd, (void *)(resHead), (size_t)(sizeof(resHead)), 0) < 0){
       perror("server-res-header");
       return 1;
     }
-    if(sendto(sockfd, buff, n , 0, (struct sockaddr *) &foreinAddr, sizeof(struct sockaddr_in)) < 0){
+    if(send(sockfd, buff, n , 0) < 0){
       perror("server-res");
       return 1;
     }
@@ -64,19 +65,21 @@ int writefile(int sockfd, char* command) {
 
     //書き込み処理
     int fd_w;
-    if ((fd_w = open("file", O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0){
+    if ((fd_w = open("file", O_WRONLY | O_CREAT | O_APPEND, 0666)) < 0){
         perror("file");
         return 1;
     }
-    send(fd_w, (char *) command, sizeof(command[1]), 0);
+
+    write(fd_w, command, sizeof(command));
+    //char clr[] = "\n";
+    //write(fd_w, clr, 1);
     close(fd_w);
 
     printf("writefile close\n");
-
     printf("readfile open\n");
     //書き込み結果を表示
     int fd_r;
-    char buff[4096] = {'\0'};
+    char buff[4096] = {};
 
     size_t n;
     if ((fd_r = open("file",O_RDONLY)) < 0){
@@ -104,15 +107,14 @@ int recv_loop(char* buff, int sockfd){
 
     int n;
     socklen_t foreinAddrSize;
-
+    memset(&foreinAddr, 0, sizeof(foreinAddr));
     foreinAddrSize = sizeof(foreinAddr);
-    sockfd = accept(sockfd,
-                  (struct sockaddr *)&foreinAddr,
-                  &foreinAddrSize);
+    sockfd = accept(sockfd, (struct sockaddr *)&foreinAddr, &foreinAddrSize);
     if (sockfd < 0)
         perror("accept"), exit(1);
     /* protocol main */
-    if((n = read(sockfd, buff, sizeof buff)) > 0){
+    usleep(100000);
+    if((n = read(sockfd, buff, 255)) > 0){
       perror("serverrecv");
     }    
 
@@ -143,7 +145,7 @@ void* editfile(int sockfd){
   size_t sock_n;
 
   char readcmd[] = "read";
-  char writecmd[] = "wtite";
+  char writecmd[] = "write";
   char endcmd[] = "end";
   char errmsg[] = "invalid command.";
 
@@ -160,7 +162,7 @@ void* editfile(int sockfd){
     sock_n = recv_loop(buff, sockfd);
     //命令コマンド文字列をパース
     command[i] = strtok(buff, " ");
-    while ( (i < ARGSIZE-1) && (command[i] != NULL)){
+    while ( (i < ARGSIZE) && (command[i] != NULL)){
       command[++i] = strtok(NULL, " ");
     }
 
@@ -173,7 +175,7 @@ void* editfile(int sockfd){
     printf("cmd parse fin!\n");
     //コマンド別に関数を実行
     //endコマンドを受信するまで実行し続ける
-    printf("%shoge%s\n",command[0], readcmd);
+    printf("%s %s\n",command[0], command[1]);
 
     if(sock_n == -1){
       sleep(1);
@@ -189,7 +191,7 @@ void* editfile(int sockfd){
       break;
     }else{
       printf("err!\n");
-      if(sendto(sockfd, errmsg, sizeof(errmsg), 0, (struct sockaddr *) &foreinAddr, sizeof(struct sockaddr_in)) < 0){
+      if(send(sockfd, errmsg, sizeof(errmsg), 0) < 0){
         perror("send err");
         return NULL;
       }
@@ -210,7 +212,7 @@ int openAcceptingSocket(int port){
     struct sockaddr_in addr; // インターネット接続用アドレス
     socklen_t addr_size;
     int sock;
-    sock = socket(PF_INET, SOCK_STREAM, 0);
+    sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sock < 0)
         perror("accepting socket"), exit(1);
     memset(&addr, 0, sizeof(addr));
