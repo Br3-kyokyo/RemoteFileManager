@@ -58,9 +58,8 @@ int main(int argc, char* argv[]){
 
     while(strcmp(buff, endcmd) != 0){
         //同期-step1
-        printf("before write\n");
         sendto(sockfd, buff, n, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-        printf("after write\n");
+        printf("send complete!\n");
 
         sleep(1);
 
